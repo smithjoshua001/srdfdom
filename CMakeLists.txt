@@ -30,7 +30,3 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
 )
 
-install(PROGRAMS 
-  scripts/display_srdf
-  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
-)
