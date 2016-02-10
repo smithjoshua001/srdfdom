@@ -9,6 +9,9 @@ find_package(urdfdom_headers REQUIRED)
 find_package(catkin REQUIRED COMPONENTS cmake_modules)
 find_package(TinyXML REQUIRED)
 
+option(SRDFDOM_COMPILE_TESTS "Compile srdfdom tests" FALSE)
+
+
 include_directories(include ${TinyXML_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${console_bridge_INCLUDE_DIRS} ${urdfdom_headers_INCLUDE_DIRS})
 link_directories(${catkin_LIBRARY_DIRS})
 
@@ -30,3 +33,10 @@ install(DIRECTORY include/${PROJECT_NAME}/
   FILES_MATCHING PATTERN "*.h"
 )
 
+#######################
+# Add Testing target  #
+#######################
+if(SRDFDOM_COMPILE_TESTS)
+  enable_testing()
+  add_subdirectory(test)
+endif()
