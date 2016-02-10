@@ -6,9 +6,7 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIR})
 
 find_package(console_bridge REQUIRED)
 find_package(urdfdom_headers REQUIRED)
-
-find_package(catkin REQUIRED COMPONENTS cmake_modules urdfdom_py)
-
+find_package(catkin REQUIRED COMPONENTS cmake_modules)
 find_package(TinyXML REQUIRED)
 
 include_directories(include ${TinyXML_INCLUDE_DIRS} ${catkin_INCLUDE_DIRS} ${console_bridge_INCLUDE_DIRS} ${urdfdom_headers_INCLUDE_DIRS})
@@ -19,7 +17,7 @@ catkin_python_setup()
 catkin_package(
   LIBRARIES ${PROJECT_NAME}
   INCLUDE_DIRS include ${TinyXML_INCLUDE_DIRS}
-  DEPENDS console_bridge urdfdom_headers urdfdom_py
+  DEPENDS console_bridge urdfdom_headers
 )
 
 add_library(${PROJECT_NAME} src/model.cpp)
@@ -38,8 +36,3 @@ install(PROGRAMS
   scripts/display_srdf
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
-if(CATKIN_ENABLE_TESTING)
-  find_package(rostest REQUIRED)
-  add_rostest(test/srdf_parser.test)
-endif()
