@@ -550,6 +550,24 @@ void srdf::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXm
   }
 }
 
+void srdf::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml) 
+{
+    
+    for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
+    {
+        const char *name = c_xml->Attribute("name");
+        if (!name)
+        {
+            logError("No name specified for disabled joint. Ignoring.");
+            continue;
+        }
+        DisabledJoint dj;
+        dj.name_ = boost::trim_copy(std::string(name));
+
+        disabled_joints_.push_back(dj);
+    }
+}
+
 bool srdf::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
 {
   clear();
@@ -577,6 +595,7 @@ bool srdf::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElement *
   loadLinkSphereApproximations(urdf_model, robot_xml);
   loadDisabledCollisions(urdf_model, robot_xml);
   loadPassiveJoints(urdf_model, robot_xml);
+  loadDisabledJoints(urdf_model, robot_xml);
   
   return true;
 }
@@ -634,6 +653,7 @@ void srdf::Model::clear()
   link_sphere_approximations_.clear();
   disabled_collisions_.clear();
   passive_joints_.clear();
+  disabled_joints_.clear();
 }
 
 std::vector<std::pair<std::string, std::string> > srdf::Model::getDisabledCollisions() const

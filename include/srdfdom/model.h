@@ -194,6 +194,13 @@ public:
     /// The name of the new joint
     std::string name_;
   };
+  
+  // Some joints can be disabled. This structure specifies information about such joints
+  struct DisabledJoint
+  {   
+      /// The name of the disabled joint
+      std::string name_;
+  };
       
   /// Get the name of this model
   const std::string& getName() const
@@ -241,6 +248,12 @@ public:
     return passive_joints_;
   }
   
+  /// Get the list of known disabled joints
+  const std::vector<DisabledJoint>& getDisabledJoints() const
+  {
+    return disabled_joints_;
+  }
+  
   /// Get the collision spheres list
   const std::vector<LinkSpheres>& getLinkSphereApproximations() const
   {
@@ -259,6 +272,7 @@ private:
   void loadLinkSphereApproximations(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadDisabledCollisions(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
+  void loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   
   std::string                    name_;
   std::vector<Group>             groups_;
@@ -268,6 +282,7 @@ private:
   std::vector<LinkSpheres>       link_sphere_approximations_;
   std::vector<DisabledCollision> disabled_collisions_;
   std::vector<PassiveJoint>      passive_joints_;
+  std::vector<DisabledJoint>     disabled_joints_;
 };
 
 }
