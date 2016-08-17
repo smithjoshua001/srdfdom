@@ -237,6 +237,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
       std::cerr << "Group is empty" << std::endl;
       // logWarn("Group '%s' is empty.", gname);
     groups_.push_back(g);
+std::cout<<groups_.size()<<"GROUP!!\n";
   }
   
   // check the subgroups
@@ -591,7 +592,36 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
   }
 }
 
-void srdf_advr::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml) 
+void srdf::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
+TiXmlElement *robot_xml)
+{
+  for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo"); c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")){
+     RTTGazebo temp;
+     temp.reference_=boost::trim_copy(std::string(c_xml->Attribute("reference")));
+     TiXmlElement* hardware_xml = robot_xml->FirstChildElement("hardware");
+     Hardware tempHard;
+	 tempHard.type_ = boost::trim_copy(std::string(hardware_xml->Attribute("type")));
+tempHard.address_ = boost::trim_copy(std::string(hardware_xml->Attribute("address")));
+     temp.hardware_info_=tempHard;
+     for (TiXmlElement* ct_xml = robot_xml->FirstChildElement("controller"); ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")){
+		Controller tempCt;
+		tempCt.type_=boost::trim_copy(std::string(ct_xml->Attribute("type")));
+		for (TiXmlElement* g_xml = robot_xml->FirstChildElement("gains"); g_xml; g_xml = g_xml->NextSiblingElement("gains")){
+		  Gains tempg;
+		  tempg.D_=atof(g_xml->Attribute("D"));
+		  tempg.I_=atof(g_xml->Attribute("I"));
+          tempg.P_=atof(g_xml->Attribute("P"));
+		  tempg.reference_=boost::trim_copy(std::string(c_xml->Attribute("reference")));
+		  tempCt.gain_params_.push_back(tempg);
+        }
+		temp.controllers_.push_back(tempCt);
+     }
+	rtt_gazebo_.insert(std::pair<std::string,RTTGazebo>(temp.reference_,temp));
+  }
+
+}
+
+void srdf::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml) 
 {
     
     for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
@@ -641,6 +671,7 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElem
   loadDisabledCollisions(urdf_model, robot_xml);
   loadPassiveJoints(urdf_model, robot_xml);
   loadDisabledJoints(urdf_model, robot_xml);
+  loadRTTGazebo(urdf_model,robot_xml);
   
   return true;
 }
@@ -701,6 +732,7 @@ void srdf_advr::Model::clear()
   disabled_collisions_.clear();
   passive_joints_.clear();
   disabled_joints_.clear();
+  rtt_gazebo_.clear();
 }
 
 std::vector<std::pair<std::string, std::string> > srdf_advr::Model::getDisabledCollisions() const

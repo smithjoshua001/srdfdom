@@ -208,6 +208,31 @@ public:
       /// The name of the disabled joint
       std::string name_;
   };
+  
+  struct Gains
+  {
+	  std::string reference_;
+	  float D_,I_,P_;
+  };
+
+  struct Controller
+  {
+	  std::string type_;
+	  std::vector<Gains> gain_params_;
+  };
+
+  struct Hardware
+  {
+      std::string type_;
+	  std::string address_;
+  };
+
+  struct RTTGazebo
+  {
+      std::string reference_;
+	  std::vector<Controller> controllers_;
+      Hardware hardware_info_;
+  };
       
   /// Get the name of this model
   const std::string& getName() const
@@ -254,6 +279,11 @@ public:
   {
     return passive_joints_;
   }
+
+   const RTTGazebo& getRTTGazebo(std::string chain_name) const
+  {
+    return rtt_gazebo_.at(chain_name);
+  }
   
   /// Get the list of known disabled joints
   const std::vector<DisabledJoint>& getDisabledJoints() const
@@ -271,7 +301,8 @@ public:
   void clear();
   
 private:
-  
+   void loadRTTGazebo(const urdf::ModelInterface &urdf_model,
+TiXmlElement *robot_xml);
   void loadVirtualJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadGroups(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadGroupStates(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
@@ -280,6 +311,7 @@ private:
   void loadDisabledCollisions(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
   void loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
+ 
   
   std::string                    name_;
   std::vector<Group>             groups_;
@@ -290,6 +322,7 @@ private:
   std::vector<DisabledCollision> disabled_collisions_;
   std::vector<PassiveJoint>      passive_joints_;
   std::vector<DisabledJoint>     disabled_joints_;
+  std::map<std::string, RTTGazebo>		 rtt_gazebo_;
 };
 
 }
