@@ -598,20 +598,29 @@ TiXmlElement *robot_xml)
   for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo"); c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")){
      RTTGazebo temp;
      temp.reference_=boost::trim_copy(std::string(c_xml->Attribute("reference")));
-     TiXmlElement* hardware_xml = robot_xml->FirstChildElement("hardware");
+     TiXmlElement* hardware_xml = c_xml->FirstChildElement("hardware");
+	 if(hardware_xml!=NULL){
      Hardware tempHard;
 	 tempHard.type_ = boost::trim_copy(std::string(hardware_xml->Attribute("type")));
 tempHard.address_ = boost::trim_copy(std::string(hardware_xml->Attribute("address")));
      temp.hardware_info_=tempHard;
-     for (TiXmlElement* ct_xml = robot_xml->FirstChildElement("controller"); ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")){
+}
+     for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller"); ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")){
 		Controller tempCt;
 		tempCt.type_=boost::trim_copy(std::string(ct_xml->Attribute("type")));
-		for (TiXmlElement* g_xml = robot_xml->FirstChildElement("gains"); g_xml; g_xml = g_xml->NextSiblingElement("gains")){
+		
+		for (TiXmlElement* g_xml = ct_xml->FirstChildElement("gains"); g_xml; g_xml = g_xml->NextSiblingElement("gains")){
 		  Gains tempg;
+		  if(tempCt.type_ == std::string("JointPositionCtrl")){
 		  tempg.D_=atof(g_xml->Attribute("D"));
 		  tempg.I_=atof(g_xml->Attribute("I"));
           tempg.P_=atof(g_xml->Attribute("P"));
-		  tempg.reference_=boost::trim_copy(std::string(c_xml->Attribute("reference")));
+          }else{
+		  tempg.D_=atof(g_xml->Attribute("damping"));
+		  //tempg.I_=atof(g_xml->Attribute("I"));
+          tempg.P_=atof(g_xml->Attribute("stiffness"));
+		  }
+		  tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
 		  tempCt.gain_params_.push_back(tempg);
         }
 		temp.controllers_.push_back(tempCt);
