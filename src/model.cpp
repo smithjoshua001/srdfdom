@@ -597,7 +597,6 @@ TiXmlElement *robot_xml)
 {
   for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo"); c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")){
      RTTGazebo temp;
-     temp.reference_=boost::trim_copy(std::string(c_xml->Attribute("reference")));
      TiXmlElement* hardware_xml = c_xml->FirstChildElement("hardware");
 	 if(hardware_xml!=NULL){
      Hardware tempHard;
@@ -620,12 +619,12 @@ tempHard.address_ = boost::trim_copy(std::string(hardware_xml->Attribute("addres
 		  //tempg.I_=atof(g_xml->Attribute("I"));
           tempg.P_=atof(g_xml->Attribute("stiffness"));
 		  }
-		  tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
-		  tempCt.gain_params_.push_back(tempg);
+		  //tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
+		  tempCt.gain_params_map_.insert(std::pair<std::string,Gains>(boost::trim_copy(std::string(g_xml->Attribute("reference"))),tempg));
         }
 		temp.controllers_.push_back(tempCt);
      }
-	rtt_gazebo_.insert(std::pair<std::string,RTTGazebo>(temp.reference_,temp));
+	rtt_gazebo_.insert(std::pair<std::string,RTTGazebo>(boost::trim_copy(std::string(c_xml->Attribute("reference"))),temp));
   }
 
 }

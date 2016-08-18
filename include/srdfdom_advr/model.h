@@ -211,14 +211,13 @@ public:
   
   struct Gains
   {
-	  std::string reference_;
 	  float D_,I_,P_;
   };
 
   struct Controller
   {
 	  std::string type_;
-	  std::vector<Gains> gain_params_;
+	  std::map<std::string,Gains> gain_params_map_;
   };
 
   struct Hardware
@@ -229,7 +228,6 @@ public:
 
   struct RTTGazebo
   {
-      std::string reference_;
 	  std::vector<Controller> controllers_;
       Hardware hardware_info_;
   };
