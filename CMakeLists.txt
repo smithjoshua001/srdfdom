@@ -3,6 +3,9 @@ project(srdfdom_advr)
 
 find_package(Boost REQUIRED)
 include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+find_package(urdfdom_headers REQUIRED)
+include_directories(BEFORE SYSTEM ${urdfdom_headers_INCLUDE_DIRS})
+
 
 find_package(PkgConfig REQUIRED)
 pkg_search_module(TINYXML REQUIRED tinyxml)
@@ -13,6 +16,9 @@ if(NOT TINYXML_INCLUDE_DIR)
     set(TINYXML_INCLUDE_DIRS ${TINYXML_INCLUDE_DIR})
     set(TINYXML_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
 endif()
+
+
+
 message(STATUS "TINYXML_VERSION: ${TINYXML_VERSION}")
 include_directories(BEFORE SYSTEM ${TINYXML_INCLUDE_DIRS})
 link_directories(${TINYXML_LIBRARY_DIR})
