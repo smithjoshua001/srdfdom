@@ -44,9 +44,11 @@
 #include <urdf_model/model.h>
 #include <tinyxml.h>
 
+// NOTE custom definition
 namespace urdf
 {
 typedef boost::shared_ptr<const ::urdf::Link> LinkConstSharedPtr;
+typedef boost::shared_ptr<const ::urdf::Joint> JointConstSharedPtr;
 }
 
 /// Main namespace
