@@ -34,8 +34,8 @@
 
 /* Author Ioan Sucan */
 
-#ifndef SRDF_MODEL_
-#define SRDF_MODEL_
+#ifndef SRDF_ADVR_MODEL_
+#define SRDF_ADVR_MODEL_
 
 #include <map>
 #include <string>
@@ -52,7 +52,7 @@ typedef boost::shared_ptr<const ::urdf::Joint> JointConstSharedPtr;
 }
 
 /// Main namespace
-namespace srdf
+namespace srdf_advr
 {
 
 /** \brief Representation of semantic information about the robot */
