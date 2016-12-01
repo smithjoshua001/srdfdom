@@ -234,7 +234,8 @@ void srdf::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlElemen
       g.subgroups_.push_back(boost::trim_copy(std::string(sub)));
     }
     if (g.links_.empty() && g.joints_.empty() && g.chains_.empty() && g.subgroups_.empty())
-      logWarn("Group '%s' is empty.", gname);
+      std::cout << "Group is empty" << std::endl;
+      // logWarn("Group '%s' is empty.", gname);
     groups_.push_back(g);
   }
   
