@@ -1,36 +1,36 @@
 /*********************************************************************
-* Software License Agreement (BSD License)
-*
-*  Copyright (c) 2011, Willow Garage, Inc.
-*  All rights reserved.
-*
-*  Redistribution and use in source and binary forms, with or without
-*  modification, are permitted provided that the following conditions
-*  are met:
-*
-*   * Redistributions of source code must retain the above copyright
-*     notice, this list of conditions and the following disclaimer.
-*   * Redistributions in binary form must reproduce the above
-*     copyright notice, this list of conditions and the following
-*     disclaimer in the documentation and/or other materials provided
-*     with the distribution.
-*   * Neither the name of the Willow Garage nor the names of its
-*     contributors may be used to endorse or promote products derived
-*     from this software without specific prior written permission.
-*
-*  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-*  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-*  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
-*  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
-*  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-*  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
-*  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-*  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-*  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
-*  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-*  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-*  POSSIBILITY OF SUCH DAMAGE.
-*********************************************************************/
+ * Software License Agreement (BSD License)
+ *
+ *  Copyright (c) 2011, Willow Garage, Inc.
+ *  All rights reserved.
+ *
+ *  Redistribution and use in source and binary forms, with or without
+ *  modification, are permitted provided that the following conditions
+ *  are met:
+ *
+ *   * Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *   * Redistributions in binary form must reproduce the above
+ *     copyright notice, this list of conditions and the following
+ *     disclaimer in the documentation and/or other materials provided
+ *     with the distribution.
+ *   * Neither the name of the Willow Garage nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
+ *
+ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ *  POSSIBILITY OF SUCH DAMAGE.
+ *********************************************************************/
 
 /* Author Ioan Sucan */
 
@@ -42,7 +42,6 @@
 #include <sstream>
 #include <set>
 #include <limits>
-
 void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
 {
   for (TiXmlElement* vj_xml = robot_xml->FirstChildElement("virtual_joint"); vj_xml; vj_xml = vj_xml->NextSiblingElement("virtual_joint"))
@@ -90,7 +89,7 @@ void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model,
       //logError("Unknown type of joint: '%s'. Assuming 'fixed' instead. Other known types are 'planar' and 'floating'.", type);
       vj.type_ = "fixed";
     }
-    vj.name_ = std::string(jname); boost::trim(vj.name_);        
+    vj.name_ = std::string(jname); boost::trim(vj.name_);
     vj.child_link_ = std::string(child); boost::trim(vj.child_link_);
     vj.parent_frame_ = std::string(parent); boost::trim(vj.parent_frame_);
     virtual_joints_.push_back(vj);
@@ -110,7 +109,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
     }
     Group g;
     g.name_ = std::string(gname); boost::trim(g.name_);
-    
+
     // get the links in the groups
     for (TiXmlElement* link_xml = group_xml->FirstChildElement("link"); link_xml; link_xml = link_xml->NextSiblingElement("link"))
     {
@@ -130,7 +129,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
       }
       g.links_.push_back(lname_str);
     }
-    
+
     // get the joints in the groups
     for (TiXmlElement* joint_xml = group_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
     {
@@ -160,7 +159,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
       }
       g.joints_.push_back(jname_str);
     }
-    
+
     // get the chains in the groups
     for (TiXmlElement* chain_xml = group_xml->FirstChildElement("chain"); chain_xml; chain_xml = chain_xml->NextSiblingElement("chain"))
     {
@@ -220,7 +219,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
         std::cerr << "Links do not form a chain" << std::endl;
         //logError("Links '%s' and '%s' do not form a chain. Not included in group '%s'", base, tip, gname);
     }
-    
+
     // get the subgroups in the groups
     for (TiXmlElement* subg_xml = group_xml->FirstChildElement("group"); subg_xml; subg_xml = subg_xml->NextSiblingElement("group"))
     {
@@ -239,7 +238,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
     groups_.push_back(g);
 std::cout<<groups_.size()<<"GROUP!!\n";
   }
-  
+
   // check the subgroups
   std::set<std::string> known_groups;
   bool update = true;
@@ -269,7 +268,7 @@ std::cout<<groups_.size()<<"GROUP!!\n";
       }
     }
   }
-  
+
   // if there are erroneous groups, keep only the valid ones
   if (known_groups.size() != groups_.size())
   {
@@ -302,11 +301,11 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
       //logError("Name of group for state '%s' is not specified", sname);
       continue;
     }
-    
+
     GroupState gs;
     gs.name_ = boost::trim_copy(std::string(sname));
     gs.group_ = boost::trim_copy(std::string(gname));
-    
+
     bool found = false;
     for (std::size_t k = 0 ; k < groups_.size() ; ++k)
       if (groups_[k].name_ == gs.group_)
@@ -320,7 +319,7 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
       //logError("Group state '%s' specified for group '%s', but that group is not known", sname, gname);
       continue;
     }
-    
+
     // get the joint values in the group state
     for (TiXmlElement* joint_xml = gstate_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
     {
@@ -370,7 +369,7 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
         std::cerr << "Unable to parse joint value" << std::endl;
         //logError("Unable to parse joint value '%s'", jval);
       }
-      
+
       if (gs.joint_values_.empty())
          std::cerr << "Unable to parse joint value for joint in group state" << std::endl;
         //logError("Unable to parse joint value ('%s') for joint '%s' in group state '%s'", jval, jname, sname);
@@ -448,7 +447,7 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
       //logError("Name of link is not specified in link_collision_spheres");
       continue;
     }
-    
+
     LinkSpheres link_spheres;
     link_spheres.link_ = boost::trim_copy(std::string(link_name));
     if (!urdf_model.getLink(link_spheres.link_))
@@ -457,7 +456,7 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
       //logError("Link '%s' is not known to URDF.", link_name);
       continue;
     }
-    
+
 
     // get the spheres for this link
     int cnt = 0;
@@ -563,7 +562,7 @@ void srdf_advr::Model::loadDisabledCollisions(const urdf::ModelInterface &urdf_m
 }
 
 void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
-{  
+{
   for (TiXmlElement* c_xml = robot_xml->FirstChildElement("passive_joint"); c_xml; c_xml = c_xml->NextSiblingElement("passive_joint"))
   {
     const char *name = c_xml->Attribute("name");
@@ -581,7 +580,7 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
     for (std::size_t i = 0 ; !vjoint && i < virtual_joints_.size() ; ++i)
       if (virtual_joints_[i].name_ == pj.name_)
         vjoint = true;
-    
+
     if (!vjoint && !urdf_model.getJoint(pj.name_))
     {
       std::cerr << "Joint marked as passive is not known to the URDF. Ignoring." << std::endl;
@@ -593,59 +592,55 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
 }
 
 void srdf::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
-TiXmlElement *robot_xml)
-{
-  for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo"); c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")){
-     RTTGazebo temp;
-     TiXmlElement* hardware_xml = c_xml->FirstChildElement("hardware");
-	 if(hardware_xml!=NULL){
-     Hardware tempHard;
-	 tempHard.type_ = boost::trim_copy(std::string(hardware_xml->Attribute("type")));
-tempHard.address_ = boost::trim_copy(std::string(hardware_xml->Attribute("address")));
-     temp.hardware_info_=tempHard;
-}
-     for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller"); ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")){
-		Controller tempCt;
-		tempCt.type_=boost::trim_copy(std::string(ct_xml->Attribute("type")));
-		
-		for (TiXmlElement* g_xml = ct_xml->FirstChildElement("gains"); g_xml; g_xml = g_xml->NextSiblingElement("gains")){
-		  Gains tempg;
-		  if(tempCt.type_ == std::string("JointPositionCtrl")){
-		  tempg.D_=atof(g_xml->Attribute("D"));
-		  tempg.I_=atof(g_xml->Attribute("I"));
-          tempg.P_=atof(g_xml->Attribute("P"));
-          }else{
-		  tempg.D_=atof(g_xml->Attribute("damping"));
-		  //tempg.I_=atof(g_xml->Attribute("I"));
-          tempg.P_=atof(g_xml->Attribute("stiffness"));
-		  }
-		  //tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
-		  tempCt.gain_params_map_.insert(std::pair<std::string,Gains>(boost::trim_copy(std::string(g_xml->Attribute("reference"))),tempg));
-        }
-		temp.controllers_.push_back(tempCt);
-     }
-	rtt_gazebo_.insert(std::pair<std::string,RTTGazebo>(boost::trim_copy(std::string(c_xml->Attribute("reference"))),temp));
-  }
+		TiXmlElement *robot_xml) {
+	for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo");
+			c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")) {
 
-}
+		RTTGazebo temp;
+		TiXmlElement* hardware_xml = c_xml->FirstChildElement("hardware");
+		if (hardware_xml != NULL) {
+			Hardware tempHard;
+			tempHard.type_ = boost::trim_copy(
+					std::string(hardware_xml->Attribute("type")));
+			tempHard.address_ = boost::trim_copy(
+					std::string(hardware_xml->Attribute("address")));
+			temp.hardware_info_ = tempHard;
+		}
+		for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller");
+				ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")) {
+			Controller tempCt;
+			tempCt.type_ = boost::trim_copy(
+					std::string(ct_xml->Attribute("type")));
 
-void srdf::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml) 
-{
-    
-    for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
-    {
-        const char *name = c_xml->Attribute("name");
-        if (!name)
-        {
-            std::cerr << "No name specified for disabled joint. Ignoring." << std::endl;
-            //logError("No name specified for disabled joint. Ignoring.");
-            continue;
-        }
-        DisabledJoint dj;
-        dj.name_ = boost::trim_copy(std::string(name));
+			for (TiXmlElement* g_xml = ct_xml->FirstChildElement("gains");
+					g_xml; g_xml = g_xml->NextSiblingElement("gains")) {
+				Gains tempg;
+				if (tempCt.type_ == std::string("JointPositionCtrl")) {
+					tempg.D_ = atof(g_xml->Attribute("D"));
+					tempg.I_ = atof(g_xml->Attribute("I"));
+					tempg.P_ = atof(g_xml->Attribute("P"));
+				} else {
+					tempg.D_ = atof(g_xml->Attribute("damping"));
+					//tempg.I_=atof(g_xml->Attribute("I"));
+					tempg.P_ = atof(g_xml->Attribute("stiffness"));
+				}
+				//tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
+				tempCt.gain_params_map_.insert(
+						std::pair<std::string, Gains>(
+								boost::trim_copy(
+										std::string(
+												g_xml->Attribute("reference"))),
+								tempg));
+			}
+			temp.controllers_.push_back(tempCt);
+		}
+		rtt_gazebo_.insert(
+				std::pair<std::string, RTTGazebo>(
+						boost::trim_copy(
+								std::string(c_xml->Attribute("reference"))),
+						temp));
+	}
 
-        disabled_joints_.push_back(dj);
-    }
 }
 
 bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
@@ -657,7 +652,7 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElem
     //logError("Could not find the 'robot' element in the xml file");
     return false;
   }
-  
+
   // get the robot name
   const char *name = robot_xml->Attribute("name");
   if (!name)
@@ -670,17 +665,17 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElem
       std::cerr << "Semantic description is not specified for the same robot as the URDF" << std::endl;
       //logError("Semantic description is not specified for the same robot as the URDF");
   }
-  
+
   loadVirtualJoints(urdf_model, robot_xml);
   loadGroups(urdf_model, robot_xml);
   loadGroupStates(urdf_model, robot_xml);
-  loadEndEffectors(urdf_model, robot_xml); 
+  loadEndEffectors(urdf_model, robot_xml);
   loadLinkSphereApproximations(urdf_model, robot_xml);
   loadDisabledCollisions(urdf_model, robot_xml);
   loadPassiveJoints(urdf_model, robot_xml);
   loadDisabledJoints(urdf_model, robot_xml);
   loadRTTGazebo(urdf_model,robot_xml);
-  
+
   return true;
 }
 
@@ -695,7 +690,6 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlDocu
   }
   return initXml(urdf_model, robot_xml);
 }
-
 
 bool srdf_advr::Model::initFile(const urdf::ModelInterface &urdf_model, const std::string& filename)
 {
@@ -727,7 +721,6 @@ bool srdf_advr::Model::initString(const urdf::ModelInterface &urdf_model, const 
   xml_doc.Parse(xmlstring.c_str());
   return initXml(urdf_model, &xml_doc);
 }
-
 
 void srdf_advr::Model::clear()
 {
