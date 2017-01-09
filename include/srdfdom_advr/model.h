@@ -223,7 +223,8 @@ public:
   struct Hardware
   {
       std::string type_;
-	  std::string address_;
+      std::string address_;
+      int portNo_;
   };
 
   struct RTTGazebo

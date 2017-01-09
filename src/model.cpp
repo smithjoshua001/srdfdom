@@ -603,7 +603,8 @@ void srdf::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
 			tempHard.type_ = boost::trim_copy(
 					std::string(hardware_xml->Attribute("type")));
 			tempHard.address_ = boost::trim_copy(
-					std::string(hardware_xml->Attribute("address")));
+					std::string(hardware_xml->Attribute("address")));			
+			tempHard.portNo_=atoi(hardware_xml->Attribute("port"));
 			temp.hardware_info_ = tempHard;
 		}
 		for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller");
