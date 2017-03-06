@@ -591,6 +591,26 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
   }
 }
 
+
+void srdf_advr::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml) 
+{
+    
+    for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
+    {
+        const char *name = c_xml->Attribute("name");
+        if (!name)
+        {
+            std::cerr << "No name specified for disabled joint. Ignoring." << std::endl;
+            //logError("No name specified for disabled joint. Ignoring.");
+            continue;
+        }
+        DisabledJoint dj;
+        dj.name_ = boost::trim_copy(std::string(name));
+
+        disabled_joints_.push_back(dj);
+    }
+}
+
 void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
 		TiXmlElement *robot_xml) {
 	for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo");
