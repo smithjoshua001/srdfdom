@@ -591,7 +591,7 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
   }
 }
 
-void srdf::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
+void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
 		TiXmlElement *robot_xml) {
 	for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo");
 			c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")) {
