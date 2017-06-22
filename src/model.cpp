@@ -235,7 +235,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                         std::cerr << "Group is empty" << std::endl;
                 // logWarn("Group '%s' is empty.", gname);
                 groups_.push_back(g);
-                std::cout<<groups_.size()<<"GROUP!!\n";
+                //std::cout<<groups_.size()<<"GROUP!!\n";
         }
 
         // check the subgroups
@@ -621,9 +621,21 @@ void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
                         Hardware tempHard;
                         tempHard.type_ = boost::trim_copy(
                                 std::string(hardware_xml->Attribute("type")));
+			const char *address=hardware_xml->Attribute("address") ;
+			 if (!address)
+                {
+                        std::cerr << "Missing address for hardware in SRDF" << std::endl;
+                        continue;
+                }
                         tempHard.address_ = boost::trim_copy(
-                                std::string(hardware_xml->Attribute("address")));
-                        tempHard.portNo_=atoi(hardware_xml->Attribute("port"));
+                                std::string(address));
+			const char *port = hardware_xml->Attribute("port");
+			 if (!port)
+                {
+                        std::cerr << "Missing port for hardware in SRDF" << std::endl;
+                        continue;
+                }
+                        tempHard.portNo_=atoi(port);
                         temp.hardware_info_ = tempHard;
                 }
                 for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller");
