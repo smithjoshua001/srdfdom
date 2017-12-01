@@ -34,16 +34,27 @@
 
 /* Author Ioan Sucan */
 #include <srdfdom_advr/model.h>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string/trim.hpp>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
 #include <set>
 #include <limits>
-void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+#include <string>
+
+std::string trim(const std::string& str)
 {
-        for (TiXmlElement* vj_xml = robot_xml->FirstChildElement("virtual_joint"); vj_xml; vj_xml = vj_xml->NextSiblingElement("virtual_joint"))
+    size_t first = str.find_first_not_of(' ');
+    if (std::string::npos == first)
+    {
+        return str;
+    }
+    size_t last = str.find_last_not_of(' ');
+    return str.substr(first, (last - first + 1));
+}
+
+void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
+{
+        for (tinyxml2::XMLElement* vj_xml = robot_xml->FirstChildElement("virtual_joint"); vj_xml; vj_xml = vj_xml->NextSiblingElement("virtual_joint"))
         {
                 const char *jname = vj_xml->Attribute("name");
                 const char *child = vj_xml->Attribute("child_link");
@@ -61,7 +72,7 @@ void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model,
                         //logError("Child link of virtual joint is not specified");
                         continue;
                 }
-                if (!urdf_model.getLink(boost::trim_copy(std::string(child))))
+                if (!urdf_model.getLink(trim(std::string(child))))
                 {
                         std::cerr << "Virtual joint does not attach to a link on the robot" << std::endl;
                         //logError("Virtual joint does not attach to a link on the robot (link '%s' is not known)", child);
@@ -80,7 +91,7 @@ void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model,
                         continue;
                 }
                 VirtualJoint vj;
-                vj.type_ = std::string(type); boost::trim(vj.type_);
+                vj.type_ = std::string(type); trim(vj.type_);
                 std::transform(vj.type_.begin(), vj.type_.end(), vj.type_.begin(), ::tolower);
                 if (vj.type_ != "planar" && vj.type_ != "floating" && vj.type_ != "fixed")
                 {
@@ -88,16 +99,16 @@ void srdf_advr::Model::loadVirtualJoints(const urdf::ModelInterface &urdf_model,
                         //logError("Unknown type of joint: '%s'. Assuming 'fixed' instead. Other known types are 'planar' and 'floating'.", type);
                         vj.type_ = "fixed";
                 }
-                vj.name_ = std::string(jname); boost::trim(vj.name_);
-                vj.child_link_ = std::string(child); boost::trim(vj.child_link_);
-                vj.parent_frame_ = std::string(parent); boost::trim(vj.parent_frame_);
+                vj.name_ = std::string(jname); trim(vj.name_);
+                vj.child_link_ = std::string(child); trim(vj.child_link_);
+                vj.parent_frame_ = std::string(parent); trim(vj.parent_frame_);
                 virtual_joints_.push_back(vj);
         }
 }
 
-void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* group_xml = robot_xml->FirstChildElement("group"); group_xml; group_xml = group_xml->NextSiblingElement("group"))
+        for (tinyxml2::XMLElement* group_xml = robot_xml->FirstChildElement("group"); group_xml; group_xml = group_xml->NextSiblingElement("group"))
         {
                 const char *gname = group_xml->Attribute("name");
                 if (!gname)
@@ -107,10 +118,10 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                         continue;
                 }
                 Group g;
-                g.name_ = std::string(gname); boost::trim(g.name_);
+                g.name_ = std::string(gname); trim(g.name_);
 
                 // get the links in the groups
-                for (TiXmlElement* link_xml = group_xml->FirstChildElement("link"); link_xml; link_xml = link_xml->NextSiblingElement("link"))
+                for (tinyxml2::XMLElement* link_xml = group_xml->FirstChildElement("link"); link_xml; link_xml = link_xml->NextSiblingElement("link"))
                 {
                         const char *lname = link_xml->Attribute("name");
                         if (!lname)
@@ -119,7 +130,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                                 //logError("Link name not specified");
                                 continue;
                         }
-                        std::string lname_str = boost::trim_copy(std::string(lname));
+                        std::string lname_str = trim(std::string(lname));
                         if (!urdf_model.getLink(lname_str))
                         {
                                 std::cerr << "Link of group is not known" << std::endl;
@@ -130,7 +141,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                 }
 
                 // get the joints in the groups
-                for (TiXmlElement* joint_xml = group_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
+                for (tinyxml2::XMLElement* joint_xml = group_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
                 {
                         const char *jname = joint_xml->Attribute("name");
                         if (!jname)
@@ -139,7 +150,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                                 //logError("Joint name not specified");
                                 continue;
                         }
-                        std::string jname_str = boost::trim_copy(std::string(jname));
+                        std::string jname_str = trim(std::string(jname));
                         if (!urdf_model.getJoint(jname_str))
                         {
                                 bool missing = true;
@@ -160,7 +171,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                 }
 
                 // get the chains in the groups
-                for (TiXmlElement* chain_xml = group_xml->FirstChildElement("chain"); chain_xml; chain_xml = chain_xml->NextSiblingElement("chain"))
+                for (tinyxml2::XMLElement* chain_xml = group_xml->FirstChildElement("chain"); chain_xml; chain_xml = chain_xml->NextSiblingElement("chain"))
                 {
                         const char *base = chain_xml->Attribute("base_link");
                         const char *tip = chain_xml->Attribute("tip_link");
@@ -176,8 +187,8 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                                 //logError("Tip link name not specified for chain");
                                 continue;
                         }
-                        std::string base_str = boost::trim_copy(std::string(base));
-                        std::string tip_str = boost::trim_copy(std::string(tip));
+                        std::string base_str = trim(std::string(base));
+                        std::string tip_str = trim(std::string(tip));
                         if (!urdf_model.getLink(base_str))
                         {
                                 std::cerr << "Link declared as part of chain not known" << std::endl;
@@ -191,7 +202,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                                 continue;
                         }
                         bool found = false;
-                        boost::shared_ptr<const urdf::Link> l = urdf_model.getLink(tip_str);
+                        std::shared_ptr<const urdf::Link> l = urdf_model.getLink(tip_str);
                         std::set<std::string> seen;
                         while (!found && l)
                         {
@@ -220,7 +231,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                 }
 
                 // get the subgroups in the groups
-                for (TiXmlElement* subg_xml = group_xml->FirstChildElement("group"); subg_xml; subg_xml = subg_xml->NextSiblingElement("group"))
+                for (tinyxml2::XMLElement* subg_xml = group_xml->FirstChildElement("group"); subg_xml; subg_xml = subg_xml->NextSiblingElement("group"))
                 {
                         const char *sub = subg_xml->Attribute("name");
                         if (!sub)
@@ -229,7 +240,7 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
                                 //logError("Group name not specified when included as subgroup");
                                 continue;
                         }
-                        g.subgroups_.push_back(boost::trim_copy(std::string(sub)));
+                        g.subgroups_.push_back(trim(std::string(sub)));
                 }
                 if (g.links_.empty() && g.joints_.empty() && g.chains_.empty() && g.subgroups_.empty())
                         std::cerr << "Group is empty" << std::endl;
@@ -282,9 +293,9 @@ void srdf_advr::Model::loadGroups(const urdf::ModelInterface &urdf_model, TiXmlE
         }
 }
 
-void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* gstate_xml = robot_xml->FirstChildElement("group_state"); gstate_xml; gstate_xml = gstate_xml->NextSiblingElement("group_state"))
+        for (tinyxml2::XMLElement* gstate_xml = robot_xml->FirstChildElement("group_state"); gstate_xml; gstate_xml = gstate_xml->NextSiblingElement("group_state"))
         {
                 const char *sname = gstate_xml->Attribute("name");
                 const char *gname = gstate_xml->Attribute("group");
@@ -302,8 +313,8 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
                 }
 
                 GroupState gs;
-                gs.name_ = boost::trim_copy(std::string(sname));
-                gs.group_ = boost::trim_copy(std::string(gname));
+                gs.name_ = trim(std::string(sname));
+                gs.group_ = trim(std::string(gname));
 
                 bool found = false;
                 for (std::size_t k = 0; k < groups_.size(); ++k)
@@ -320,7 +331,7 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
                 }
 
                 // get the joint values in the group state
-                for (TiXmlElement* joint_xml = gstate_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
+                for (tinyxml2::XMLElement* joint_xml = gstate_xml->FirstChildElement("joint"); joint_xml; joint_xml = joint_xml->NextSiblingElement("joint"))
                 {
                         const char *jname = joint_xml->Attribute("name");
                         const char *jval = joint_xml->Attribute("value");
@@ -336,7 +347,7 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
                                 //logError("Joint name not specified for joint '%s' in group state '%s'", jname, sname);
                                 continue;
                         }
-                        std::string jname_str = boost::trim_copy(std::string(jname));
+                        std::string jname_str = trim(std::string(jname));
                         if (!urdf_model.getJoint(jname_str))
                         {
                                 bool missing = true;
@@ -360,10 +371,15 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
                                 while (ss.good() && !ss.eof())
                                 {
                                         std::string val; ss >> val >> std::ws;
-                                        gs.joint_values_[jname_str].push_back(boost::lexical_cast<double>(val));
+                                        gs.joint_values_[jname_str].push_back(std::stod(val));
                                 }
                         }
-                        catch (boost::bad_lexical_cast &e)
+                        catch (std::invalid_argument &e)
+                        {
+                                std::cerr << "Unable to parse joint value" << std::endl;
+                                //logError("Unable to parse joint value '%s'", jval);
+                        }
+                        catch (std::out_of_range &e)
                         {
                                 std::cerr << "Unable to parse joint value" << std::endl;
                                 //logError("Unable to parse joint value '%s'", jval);
@@ -377,9 +393,9 @@ void srdf_advr::Model::loadGroupStates(const urdf::ModelInterface &urdf_model, T
         }
 }
 
-void srdf_advr::Model::loadEndEffectors(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadEndEffectors(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* eef_xml = robot_xml->FirstChildElement("end_effector"); eef_xml; eef_xml = eef_xml->NextSiblingElement("end_effector"))
+        for (tinyxml2::XMLElement* eef_xml = robot_xml->FirstChildElement("end_effector"); eef_xml; eef_xml = eef_xml->NextSiblingElement("end_effector"))
         {
                 const char *ename = eef_xml->Attribute("name");
                 const char *gname = eef_xml->Attribute("group");
@@ -398,8 +414,8 @@ void srdf_advr::Model::loadEndEffectors(const urdf::ModelInterface &urdf_model, 
                         continue;
                 }
                 EndEffector e;
-                e.name_ = std::string(ename); boost::trim(e.name_);
-                e.component_group_ = std::string(gname); boost::trim(e.component_group_);
+                e.name_ = std::string(ename); trim(e.name_);
+                e.component_group_ = std::string(gname); trim(e.component_group_);
                 bool found = false;
                 for (std::size_t k = 0; k < groups_.size(); ++k)
                         if (groups_[k].name_ == e.component_group_)
@@ -419,7 +435,7 @@ void srdf_advr::Model::loadEndEffectors(const urdf::ModelInterface &urdf_model, 
                         //logError("Parent link not specified for end effector '%s'", ename);
                         continue;
                 }
-                e.parent_link_ = std::string(parent); boost::trim(e.parent_link_);
+                e.parent_link_ = std::string(parent); trim(e.parent_link_);
                 if (!urdf_model.getLink(e.parent_link_))
                 {
                         std::cerr << "Link specified as parent for end effector is not known to the URDF" << std::endl;
@@ -428,15 +444,15 @@ void srdf_advr::Model::loadEndEffectors(const urdf::ModelInterface &urdf_model, 
                 }
                 if (parent_group)
                 {
-                        e.parent_group_ = std::string(parent_group); boost::trim(e.parent_group_);
+                        e.parent_group_ = std::string(parent_group); trim(e.parent_group_);
                 }
                 end_effectors_.push_back(e);
         }
 }
 
-void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* cslink_xml = robot_xml->FirstChildElement("link_sphere_approximation"); cslink_xml; cslink_xml = cslink_xml->NextSiblingElement("link_sphere_approximation"))
+        for (tinyxml2::XMLElement* cslink_xml = robot_xml->FirstChildElement("link_sphere_approximation"); cslink_xml; cslink_xml = cslink_xml->NextSiblingElement("link_sphere_approximation"))
         {
                 int non_0_radius_sphere_cnt = 0;
                 const char *link_name = cslink_xml->Attribute("link");
@@ -448,7 +464,7 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
                 }
 
                 LinkSpheres link_spheres;
-                link_spheres.link_ = boost::trim_copy(std::string(link_name));
+                link_spheres.link_ = trim(std::string(link_name));
                 if (!urdf_model.getLink(link_spheres.link_))
                 {
                         std::cerr << "Link is not known to URDF." << std::endl;
@@ -459,7 +475,7 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
 
                 // get the spheres for this link
                 int cnt = 0;
-                for (TiXmlElement* sphere_xml = cslink_xml->FirstChildElement("sphere"); sphere_xml; sphere_xml = sphere_xml->NextSiblingElement("sphere"), cnt++)
+                for (tinyxml2::XMLElement* sphere_xml = cslink_xml->FirstChildElement("sphere"); sphere_xml; sphere_xml = sphere_xml->NextSiblingElement("sphere"), cnt++)
                 {
                         const char *s_center = sphere_xml->Attribute("center");
                         const char *s_r = sphere_xml->Attribute("radius");
@@ -476,7 +492,7 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
                                 std::stringstream center(s_center);
                                 center.exceptions(std::stringstream::failbit | std::stringstream::badbit);
                                 center >> sphere.center_x_ >> sphere.center_y_ >> sphere.center_z_;
-                                sphere.radius_ = boost::lexical_cast<double>(s_r);
+                                sphere.radius_ = std::stod(s_r);
                         }
                         catch (std::stringstream::failure &e)
                         {
@@ -484,7 +500,13 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
                                 //logError("Link collision sphere %d for link '%s' has bad center attribute value.", cnt, link_name);
                                 continue;
                         }
-                        catch (boost::bad_lexical_cast &e)
+                        catch (std::invalid_argument &e)
+                        {
+                                std::cerr << "Link collision sphere for link has bad radius attribute value." << std::endl;
+                                //logError("Link collision sphere %d for link '%s' has bad radius attribute value.", cnt, link_name);
+                                continue;
+                        }
+                        catch (std::out_of_range &e)
                         {
                                 std::cerr << "Link collision sphere for link has bad radius attribute value." << std::endl;
                                 //logError("Link collision sphere %d for link '%s' has bad radius attribute value.", cnt, link_name);
@@ -526,9 +548,9 @@ void srdf_advr::Model::loadLinkSphereApproximations(const urdf::ModelInterface &
         }
 }
 
-void srdf_advr::Model::loadDisabledCollisions(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadDisabledCollisions(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disable_collisions"); c_xml; c_xml = c_xml->NextSiblingElement("disable_collisions"))
+        for (tinyxml2::XMLElement* c_xml = robot_xml->FirstChildElement("disable_collisions"); c_xml; c_xml = c_xml->NextSiblingElement("disable_collisions"))
         {
                 const char *link1 = c_xml->Attribute("link1");
                 const char *link2 = c_xml->Attribute("link2");
@@ -539,8 +561,8 @@ void srdf_advr::Model::loadDisabledCollisions(const urdf::ModelInterface &urdf_m
                         continue;
                 }
                 DisabledCollision dc;
-                dc.link1_ = boost::trim_copy(std::string(link1));
-                dc.link2_ = boost::trim_copy(std::string(link2));
+                dc.link1_ = trim(std::string(link1));
+                dc.link2_ = trim(std::string(link2));
                 if (!urdf_model.getLink(dc.link1_))
                 {
                         std::cerr << "Link is not known to URDF. Cannot disable collisons." << std::endl;
@@ -560,9 +582,9 @@ void srdf_advr::Model::loadDisabledCollisions(const urdf::ModelInterface &urdf_m
         }
 }
 
-void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
-        for (TiXmlElement* c_xml = robot_xml->FirstChildElement("passive_joint"); c_xml; c_xml = c_xml->NextSiblingElement("passive_joint"))
+        for (tinyxml2::XMLElement* c_xml = robot_xml->FirstChildElement("passive_joint"); c_xml; c_xml = c_xml->NextSiblingElement("passive_joint"))
         {
                 const char *name = c_xml->Attribute("name");
                 if (!name)
@@ -572,7 +594,7 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
                         continue;
                 }
                 PassiveJoint pj;
-                pj.name_ = boost::trim_copy(std::string(name));
+                pj.name_ = trim(std::string(name));
 
                 // see if a virtual joint was marked as passive
                 bool vjoint = false;
@@ -591,10 +613,10 @@ void srdf_advr::Model::loadPassiveJoints(const urdf::ModelInterface &urdf_model,
 }
 
 
-void srdf_advr::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+void srdf_advr::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
 
-        for (TiXmlElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
+        for (tinyxml2::XMLElement* c_xml = robot_xml->FirstChildElement("disabled_joint"); c_xml; c_xml = c_xml->NextSiblingElement("disabled_joint"))
         {
                 const char *name = c_xml->Attribute("name");
                 if (!name)
@@ -604,22 +626,22 @@ void srdf_advr::Model::loadDisabledJoints(const urdf::ModelInterface &urdf_model
                         continue;
                 }
                 DisabledJoint dj;
-                dj.name_ = boost::trim_copy(std::string(name));
+                dj.name_ = trim(std::string(name));
 
                 disabled_joints_.push_back(dj);
         }
 }
 
 void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
-                                     TiXmlElement *robot_xml) {
-        for (TiXmlElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo");
+                                     tinyxml2::XMLElement *robot_xml) {
+        for (tinyxml2::XMLElement* c_xml = robot_xml->FirstChildElement("rtt-gazebo");
              c_xml; c_xml = c_xml->NextSiblingElement("rtt-gazebo")) {
 
                 RTTGazebo temp;
-                TiXmlElement* hardware_xml = c_xml->FirstChildElement("hardware");
+                tinyxml2::XMLElement* hardware_xml = c_xml->FirstChildElement("hardware");
                 if (hardware_xml != NULL) {
                         Hardware tempHard;
-                        tempHard.type_ = boost::trim_copy(
+                        tempHard.type_ = trim(
                                 std::string(hardware_xml->Attribute("type")));
 			const char *address=hardware_xml->Attribute("address") ;
 			 if (!address)
@@ -627,7 +649,7 @@ void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
                         std::cerr << "Missing address for hardware in SRDF" << std::endl;
                         continue;
                 }
-                        tempHard.address_ = boost::trim_copy(
+                        tempHard.address_ = trim(
                                 std::string(address));
 			const char *port = hardware_xml->Attribute("port");
 			 if (!port)
@@ -638,13 +660,13 @@ void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
                         tempHard.portNo_=atoi(port);
                         temp.hardware_info_ = tempHard;
                 }
-                for (TiXmlElement* ct_xml = c_xml->FirstChildElement("controller");
+                for (tinyxml2::XMLElement* ct_xml = c_xml->FirstChildElement("controller");
                      ct_xml; ct_xml = ct_xml->NextSiblingElement("controller")) {
                         Controller tempCt;
-                        tempCt.type_ = boost::trim_copy(
+                        tempCt.type_ = trim(
                                 std::string(ct_xml->Attribute("type")));
 
-                        for (TiXmlElement* g_xml = ct_xml->FirstChildElement("gains");
+                        for (tinyxml2::XMLElement* g_xml = ct_xml->FirstChildElement("gains");
                              g_xml; g_xml = g_xml->NextSiblingElement("gains")) {
                                 Gains tempg;
                                 if (tempCt.type_ == std::string("JointPositionCtrl")) {
@@ -656,10 +678,10 @@ void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
                                         //tempg.I_=atof(g_xml->Attribute("I"));
                                         tempg.P_ = atof(g_xml->Attribute("stiffness"));
                                 }
-                                //tempg.reference_=boost::trim_copy(std::string(g_xml->Attribute("reference")));
+                                //tempg.reference_=trim(std::string(g_xml->Attribute("reference")));
                                 tempCt.gain_params_map_.insert(
                                         std::pair<std::string, Gains>(
-                                                boost::trim_copy(
+                                                trim(
                                                         std::string(
                                                                 g_xml->Attribute("reference"))),
                                                 tempg));
@@ -668,17 +690,17 @@ void srdf_advr::Model::loadRTTGazebo(const urdf::ModelInterface &urdf_model,
                 }
                 rtt_gazebo_.insert(
                         std::pair<std::string, RTTGazebo>(
-                                boost::trim_copy(
+                                trim(
                                         std::string(c_xml->Attribute("reference"))),
                                 temp));
         }
 
 }
 
-bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml)
+bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml)
 {
         clear();
-        if (!robot_xml || robot_xml->ValueStr() != "robot")
+        if (!robot_xml || robot_xml->Value() != "robot")
         {
                 std::cerr << "Could not find the 'robot' element in the xml file" << std::endl;
                 //logError("Could not find the 'robot' element in the xml file");
@@ -692,7 +714,7 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElem
         //logError("No name given for the robot.");
         else
         {
-                name_ = std::string(name); boost::trim(name_);
+                name_ = std::string(name); trim(name_);
                 if (name_ != urdf_model.getName())
                         std::cerr << "Semantic description is not specified for the same robot as the URDF" << std::endl;
                 //logError("Semantic description is not specified for the same robot as the URDF");
@@ -711,9 +733,9 @@ bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlElem
         return true;
 }
 
-bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, TiXmlDocument *xml)
+bool srdf_advr::Model::initXml(const urdf::ModelInterface &urdf_model, tinyxml2::XMLDocument *xml)
 {
-        TiXmlElement *robot_xml = xml ? xml->FirstChildElement("robot") : NULL;
+        tinyxml2::XMLElement *robot_xml = xml ? xml->FirstChildElement("robot") : NULL;
         if (!robot_xml)
         {
                 std::cerr << "Could not find the 'robot' element in the xml file" << std::endl;
@@ -749,7 +771,7 @@ bool srdf_advr::Model::initFile(const urdf::ModelInterface &urdf_model, const st
 
 bool srdf_advr::Model::initString(const urdf::ModelInterface &urdf_model, const std::string& xmlstring)
 {
-        TiXmlDocument xml_doc;
+        tinyxml2::XMLDocument xml_doc;
         xml_doc.Parse(xmlstring.c_str());
         return initXml(urdf_model, &xml_doc);
 }

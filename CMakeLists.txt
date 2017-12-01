@@ -1,31 +1,38 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(srdfdom_advr)
 
-find_package(Boost REQUIRED)
-include_directories(SYSTEM ${Boost_INCLUDE_DIR})
+function(ExtractLibraries outputVar libraryHints)
+	foreach(LIB ${ARGN})
+		message(STATUS "LIB: ${LIB}")
+		find_library(TMP ${LIB} HINTS ${libraryHints})
+		set( ${outputVar} ${${outputVar}} ${TMP})
+		unset(TMP CACHE)
+	endforeach(LIB)
+  set(${outputVar} ${${outputVar}} PARENT_SCOPE)
+endfunction()
+
+if (NOT MSVC)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+endif()
+
 find_package(urdfdom_headers REQUIRED)
 include_directories(BEFORE SYSTEM ${urdfdom_headers_INCLUDE_DIRS})
 
 
 find_package(PkgConfig REQUIRED)
-pkg_search_module(TINYXML REQUIRED tinyxml)
-if(NOT TINYXML_INCLUDE_DIR)
-        find_path("/usr/include" tinyxml.h)
-        find_library(TINYXML_LIBRARY NAMES tinyxml)
-        set(TINYXML_LIBRARIES ${TINYXML_LIBRARY})
-    set(TINYXML_INCLUDE_DIRS ${TINYXML_INCLUDE_DIR})
-    set(TINYXML_LIBRARY_DIR "/usr/lib/x86_64-linux-gnu")
-endif()
+pkg_search_module(TINYXML2 REQUIRED TinyXML2 tinyxml2)
+ExtractLibraries(TINYXML_LIBRARIES ${TINYXML2_LIBRARY_DIRS} ${TINYXML2_LIBRARIES})
+message(STATUS "TINYXML2 LIBS: ${TINYXML_LIBRARIES}")
 
 
 
-message(STATUS "TINYXML_VERSION: ${TINYXML_VERSION}")
-include_directories(BEFORE SYSTEM ${TINYXML_INCLUDE_DIRS})
-link_directories(${TINYXML_LIBRARY_DIR})
+message(STATUS "TINYXML_VERSION: ${TINYXML2_VERSION}")
+include_directories(BEFORE SYSTEM ${TINYXML2_INCLUDE_DIRS})
+link_directories(${TINYXML2_LIBRARY_DIRS})
 message(STATUS "TINYXML_LIBRARIES: ${TINYXML_LIBRARIES}")
-message(STATUS "TINYXML_LIBRARY_DIR: ${TINYXML_LIBRARY_DIR}")
-message(STATUS "TINYXML_INCLUDE_DIR: ${TINYXML_INCLUDE_DIRS}")
-message(STATUS "TINYXML_LIBRARY: ${TINYXML_LIBRARY}")
+message(STATUS "TINYXML_LIBRARY_DIR: ${TINYXML2_LIBRARY_DIR}")
+message(STATUS "TINYXML_INCLUDE_DIR: ${TINYXML2_INCLUDE_DIRS}")
+message(STATUS "TINYXML_LIBRARY: ${TINYXML2_LIBRARY}")
 
 include_directories(include ${TINYXML_INCLUDE_DIRS})
 

@@ -42,13 +42,15 @@
 #include <vector>
 #include <utility>
 #include <urdf_model/model.h>
-#include <tinyxml.h>
+#include <memory>
+#include <tinyxml2.h>
+#include <iostream>
 
 // NOTE custom definition
 namespace urdf
 {
-typedef boost::shared_ptr<const ::urdf::Link> LinkConstSharedPtr;
-typedef boost::shared_ptr<const ::urdf::Joint> JointConstSharedPtr;
+typedef std::shared_ptr<const ::urdf::Link> LinkConstSharedPtr;
+typedef std::shared_ptr<const ::urdf::Joint> JointConstSharedPtr;
 }
 
 /// Main namespace
@@ -59,24 +61,24 @@ namespace srdf_advr
 class Model
 {
 public:
-  
+
   Model()
   {
   }
-  
+
   ~Model()
   {
   }
-  
-  /// \brief Load Model from TiXMLElement
-  bool initXml(const urdf::ModelInterface &urdf_model, TiXmlElement *xml);
-  /// \brief Load Model from TiXMLDocument
-  bool initXml(const urdf::ModelInterface &urdf_model, TiXmlDocument *xml);
+
+  /// \brief Load Model from tinyxml2::XMLElement
+  bool initXml(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *xml);
+  /// \brief Load Model from tinyxml2::XMLDocument
+  bool initXml(const urdf::ModelInterface &urdf_model, tinyxml2::XMLDocument *xml);
   /// \brief Load Model given a filename
   bool initFile(const urdf::ModelInterface &urdf_model, const std::string& filename);
   /// \brief Load Model from a XML-string
   bool initString(const urdf::ModelInterface &urdf_model, const std::string& xmlstring);
-  
+
   /** \brief A group consists of a set of joints and the
       corresponding descendant links. There are multiple ways to
       specify a group. Directly specifying joints, links or
@@ -85,32 +87,32 @@ public:
   {
     /// The name of the group
     std::string                                       name_;
-    
+
     /// Directly specified joints to be included in the
     /// group. Descendent links should be implicitly
     /// considered to be part of the group, although this
     /// parsed does not add them to links_. The joints are
     /// checked to be in the corresponding URDF.
     std::vector<std::string>                          joints_;
-    
+
     /// Directly specified links to be included in the
     /// group. Parent joints should be implicitly considered
     /// to be part of the group. The links are checked to be
     /// in the corresponding URDF.
     std::vector<std::string>                          links_;
-    
+
     /// Specify a chain of links (and the implicit joints) to
     /// be added to the group. Each chain is specified as a
     /// pair of base link and tip link. It is checked that the
     /// chain is indeed a chain in the specified URDF.
     std::vector<std::pair<std::string, std::string> > chains_;
-    
+
     /// It is sometimes convenient to refer to the content of
     /// another group. A group can include the content of the
     /// referenced groups
     std::vector<std::string>                          subgroups_;
   };
-  
+
   /// In addition to the joints specified in the URDF it is
   /// sometimes convenient to add special (virtual) joints. For
   /// example, to connect the robot to the environment in a
@@ -119,47 +121,47 @@ public:
   {
     /// The name of the new joint
     std::string name_;
-    
+
     /// The type of this new joint. This can be "fixed" (0 DOF), "planar" (3 DOF: x,y,yaw) or "floating" (6DOF)
     std::string type_;
-    
+
     /// The transform applied by this joint to the robot model brings that model to a particular frame.
     std::string parent_frame_;
-    
+
     /// The link this joint applies to
     std::string child_link_;
   };
-  
+
   /// Representation of an end effector
   struct EndEffector
   {
     /// The name of the end effector
     std::string name_;
-    
+
     /// The name of the link this end effector connects to
     std::string parent_link_;
-    
+
     /// The name of the group to be considered the parent (this group should contain parent_link_)
     /// If not specified, this member is empty.
     std::string parent_group_;
-    
+
     /// The name of the group that includes the joints & links this end effector consists of
     std::string component_group_;
   };
-  
+
   /// A named state for a particular group
   struct GroupState
   {
     /// The name of the state
     std::string                                 name_;
-    
+
     /// The name of the group this state is specified for
     std::string                                 group_;
-    
+
     /// The values of joints for this state. Each joint can have a value. We use a vector for the 'value' to support multi-DOF joints
     std::map<std::string, std::vector<double> > joint_values_;
   };
-  
+
   /// The definition of a sphere
   struct Sphere
   {
@@ -181,7 +183,7 @@ public:
     /// The spheres for the link.
     std::vector<Sphere> spheres_;
   };
-  
+
   /// The definition of a disabled collision between two links
   struct DisabledCollision
   {
@@ -194,21 +196,21 @@ public:
     /// The reason why the collision check was disabled
     std::string reason_;
   };
-  
+
   // Some joints can be passive (not actuated). This structure specifies information about such joints
   struct PassiveJoint
-  {   
+  {
     /// The name of the new joint
     std::string name_;
   };
-  
+
   // Some joints can be disabled. This structure specifies information about such joints
   struct DisabledJoint
-  {   
+  {
       /// The name of the disabled joint
       std::string name_;
   };
-  
+
   struct Gains
   {
 	  float D_,I_,P_;
@@ -232,47 +234,47 @@ public:
 	  std::vector<Controller> controllers_;
       Hardware hardware_info_;
   };
-      
+
   /// Get the name of this model
   const std::string& getName() const
   {
     return name_;
   }
-  
+
   /// Get the list of pairs of links that need not be checked for collisions (because they can never touch given the geometry and kinematics of the robot)
   const std::vector<DisabledCollision>& getDisabledCollisionPairs() const
   {
     return disabled_collisions_;
   }
-  
+
   /// \deprecated{ Use the version returning DisabledCollision }
-  __attribute__ ((deprecated)) 
+  __attribute__ ((deprecated))
   std::vector<std::pair<std::string, std::string> > getDisabledCollisions() const;
-  
+
   /// Get the list of groups defined for this model
   const std::vector<Group>& getGroups() const
   {
     return groups_;
   }
-  
+
   /// Get the list of virtual joints defined for this model
   const std::vector<VirtualJoint>& getVirtualJoints() const
   {
     return virtual_joints_;
   }
-  
+
   /// Get the list of end effectors defined for this model
   const std::vector<EndEffector>& getEndEffectors() const
   {
     return end_effectors_;
   }
-  
+
   /// Get the list of group states defined for this model
   const std::vector<GroupState>& getGroupStates() const
   {
     return group_states_;
   }
-  
+
   /// Get the list of known passive joints
   const std::vector<PassiveJoint>& getPassiveJoints() const
   {
@@ -283,35 +285,35 @@ public:
   {
     return rtt_gazebo_.at(chain_name);
   }
-  
+
   /// Get the list of known disabled joints
   const std::vector<DisabledJoint>& getDisabledJoints() const
   {
     return disabled_joints_;
   }
-  
+
   /// Get the collision spheres list
   const std::vector<LinkSpheres>& getLinkSphereApproximations() const
   {
     return link_sphere_approximations_;
   }
-  
+
   /// Clear the model
   void clear();
-  
+
 private:
    void loadRTTGazebo(const urdf::ModelInterface &urdf_model,
-TiXmlElement *robot_xml);
-  void loadVirtualJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadGroups(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadGroupStates(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadEndEffectors(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadLinkSphereApproximations(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadDisabledCollisions(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadPassiveJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
-  void loadDisabledJoints(const urdf::ModelInterface &urdf_model, TiXmlElement *robot_xml);
- 
-  
+tinyxml2::XMLElement *robot_xml);
+  void loadVirtualJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadGroups(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadGroupStates(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadEndEffectors(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadLinkSphereApproximations(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadDisabledCollisions(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadPassiveJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+  void loadDisabledJoints(const urdf::ModelInterface &urdf_model, tinyxml2::XMLElement *robot_xml);
+
+
   std::string                    name_;
   std::vector<Group>             groups_;
   std::vector<GroupState>        group_states_;
